@@ -15,7 +15,7 @@ Kubernetes deployment of portfolio website on GCP. Portfolio image being built f
 Build docker image
 ```
 cd portfolio_image/
-docker build -t janortop5/portfolio .
+docker build -t janortop5/portfolio:latest . --no-cache
 ```
 Login to Dockerhub account
 ```
@@ -23,7 +23,7 @@ docker login
 ```
 Push image to Dockerhub
 ```
-docker push janortop5/portfolio
+docker push janortop5/portfolio:latest
 ```
 ### Deploy
 Create kubernetes components <br>

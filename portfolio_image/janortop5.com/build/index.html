@@ -1,1 +1,96 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"/><link rel="icon" href="./favicon.ico"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="theme-color" content="#000000"/><meta name="description" content="Web site created using create-react-app"/><link rel="apple-touch-icon" href="./logo192.png"/><link rel="manifest" href="./manifest.json"/><title>Emmanuel Aladejana Portfolio</title><base href="/"/><script defer="defer" src="./static/js/main.9f6a9cb6.js"></script><link href="./static/css/main.0e2e49af.css" rel="stylesheet"></head><body><noscript>You need to enable JavaScript to run this app.</noscript><div id="root"></div></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <link rel="icon" href="./favicon.ico"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="theme-color" content="#000000"/>
+    <meta name="description" content="Web site created using create-react-app"/>
+    <link rel="apple-touch-icon" href="./logo192.png"/>
+    <link rel="manifest" href="./manifest.json"/>
+    <title>Emmanuel Aladejana Portfolio</title>
+    <base href="/"/>
+    <script defer="defer" src="./static/js/main.9f6a9cb6.js"></script>
+    <link href="./static/css/main.0e2e49af.css" rel="stylesheet">
+</head>
+<body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const rootElement = document.getElementById('root');
+
+            // 1. The exact preferred data from your JS file
+            // Note: 'https://' has been added to ensure the links route externally and don't break
+            const preferredProjectData = [
+                {
+                    title: 'Deploy infrastructure and provision web servers with Terraform and Ansible',
+                    text: 'This project demonstrates the integration of Terraform and Ansible to set up and provision a scalable web infrastructure on AWS. It automates the deployment of three EC2 instances behind a load balancer, complete with networking, security, and DNS configurations.',
+                    link: 'https://github.com/Janortop5/altschool-january-terraform-x-ansible-mini-project'
+                },
+                {
+                    title: 'Socks Shop Microservices demo and Laravel app on AWS EKS Cluster',
+                    text: 'The Watchn Application Deployment Pipeline is a comprehensive CI/CD solution designed to automate the deployment of the Watchn microservices application. This pipeline leverages AWS services, GitLab CI/CD, and various open-source tools to provide a robust, scalable, and secure deployment process for both staging and production environments.',
+                    link: 'https://github.com/Janortop5/microservices-demo-and-laravel-app---pipeline-terraform-kubernetes-prometheus'
+                },
+                {
+                    title: 'Ansible playbook to setup web server, deploy Laravel app, and run bash script to install and setup Postgres on web server',
+                    text: 'Ansible playbook to setup web server, deploy Laravel app, and run bash script to install and setup Postgres on web server',
+                    link: 'https://github.com/Janortop5/altschool-cloud-ansible-second-semester-exam'
+                },
+                {
+                    title: 'Simple File Processing CLI Tool',
+                    text: "This project implements a command-line interface (CLI) tool for processing and anonymizing large log files. It's designed to handle sensitive data by transforming it into a more secure format.",
+                    link: 'https://github.com/Janortop5/docker-laravel-app'
+                }
+            ];
+
+            // 2. Watch the DOM and override the cards once React renders them
+            const observer = new MutationObserver(() => {
+                
+                // Target the specific container wrapping your project cards using its Tailwind classes
+                const cardsContainer = document.querySelector('div.flex.justify-center.flex-wrap.gap-4');
+                
+                if (cardsContainer && cardsContainer.children.length > 0) {
+                    const cards = cardsContainer.children;
+                    
+                    for (let i = 0; i < cards.length && i < preferredProjectData.length; i++) {
+                        const card = cards[i];
+                        const data = preferredProjectData[i];
+                        
+                        // Force override the links
+                        const anchor = card.tagName.toLowerCase() === 'a' ? card : card.querySelector('a');
+                        if (anchor && anchor.href !== data.link) {
+                            anchor.href = data.link;
+                            anchor.target = "_blank"; // Forces the link to open in a new tab
+                        }
+
+                        // Force override the text (Titles and Descriptions)
+                        // Filters out elements with children to safely target just the raw text nodes
+                        const textElements = Array.from(card.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span'))
+                            .filter(el => el.children.length === 0 && el.textContent.trim().length > 0);
+                        
+                        if (textElements.length >= 2) {
+                            if (textElements[0].textContent !== data.title) {
+                                textElements[0].textContent = data.title;
+                            }
+                            if (textElements[1].textContent !== data.text) {
+                                textElements[1].textContent = data.text;
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Start observing
+            if (rootElement) {
+                observer.observe(rootElement, {
+                    childList: true,
+                    subtree: true
+                });
+            }
+        });
+    </script>
+</body>
+</html>
