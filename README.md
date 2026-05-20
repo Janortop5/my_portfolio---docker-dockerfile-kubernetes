@@ -32,6 +32,16 @@ in ./
 kubectl create -f portfolio.yml
 ```
 
+### portforward portfolio service
+```
+kubectl port-forward -n portfolio service/portfolio-service 8888:8080
+```
+
+### View in browser
+```
+127.0.0.1:8888
+```
+
 ### Screenshot of Deployed Website
 
 ![portfolilio website](./website-screenshots/screenshot-1.png)
