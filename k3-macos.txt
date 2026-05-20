@@ -1,0 +1,41 @@
+# TO BUILD K3 WITH BYPASS OF MULTIPASS
+brew install multipass
+multipass version
+brew install k3d
+k3d version
+multipass launch --name newk3sServer --cpus 2 --memory 3G --disk 20G
+multipass shell newk3sServer
+sudo apt update
+sudo apt install docker.io
+cat /etc/docker/daemon.json >> "
+{
+"dns": ["172.17.0.1", "8.8.8.8"]
+}
+"
+sudo apt install make
+# Clone a SPECIFIC stable tag instead of latest master
+git clone --depth 1 --branch v1.33.0+k3s1 https://github.com/k3s-io/k3s.git
+cd k3s
+sudo mkdir -p build/data && make download
+sudo SKIP_VALIDATE=true make
+newgrp docker
+sudo docker images
+sudo docker save rancher/k3s:v1.33.0-k3s-63ab8e53-arm64 | gzip > ~/rk3s.tar.gz # use actual image name from docker ps output
+exit # run as many time to exit
+multipass transfer newk3sServer:rk3s.tar.gz ~/Downloads
+multipass transfer newk3sServer:rk3s.tar.gz ~/Downloads/rk3s.tar.gz
+ls -lh ~/Downloads/rk3s.tar.gz
+docker load -i ~/Downloads/rk3s.tar.gz
+docker images | grep rancher
+k3d cluster create --image rancher/k3s:v1.33.0-k3s-63ab8e53-arm64 # use actual image name from docker ps output
+k3d cluster list
+kubectl get pods -A
+
+# to tear down multipass
+exit
+
+multipass stop newk3sServer
+multipass delete newk3sServer
+multipass purge
+
+

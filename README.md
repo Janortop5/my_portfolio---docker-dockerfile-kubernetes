@@ -29,6 +29,7 @@ docker push janortop5/portfolio:latest
 Create kubernetes components <br>
 in ./
 ```
+cd ..
 kubectl create -f portfolio.yml
 ```
 

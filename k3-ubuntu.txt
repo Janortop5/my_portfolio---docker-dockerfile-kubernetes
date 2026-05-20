@@ -1,0 +1,77 @@
+# TO BUILD K3 WITH MULTIPASS ON AN UBUNTU HOST
+
+# 1. Install host requirements (Multipass, k3d, Docker, and kubectl)
+sudo snap install multipass
+multipass version
+
+curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+k3d version
+
+sudo apt update
+sudo apt install -y docker.io
+sudo snap install kubectl --classic
+
+# 2. Launch the VM
+multipass launch --name newk3sServer --cpus 2 --memory 3G --disk 20G
+multipass shell newk3sServer
+
+# ==========================================
+# INSIDE MULTIPASS VM:
+# ==========================================
+sudo apt update
+sudo apt install -y docker.io make git
+
+# Corrected JSON write for daemon.json
+sudo mkdir -p /etc/docker
+cat <<EOF | sudo tee /etc/docker/daemon.json
+{
+  "dns": ["172.17.0.1", "8.8.8.8"]
+}
+EOF
+sudo systemctl restart docker
+
+# Clone a SPECIFIC stable tag instead of latest master
+git clone --depth 1 --branch v1.33.0+k3s1 https://github.com/k3s-io/k3s.git
+cd k3s
+sudo mkdir -p build/data && sudo make download
+sudo SKIP_VALIDATE=true make
+
+# Check the generated image name (it will be amd64 on x64 hardware)
+sudo docker images
+
+# Save the image using the exact tag from the output above
+sudo docker save rancher/k3s:v1.33.0-k3s-63ab8e53-amd64 | gzip > ~/rk3s.tar.gz
+
+exit
+# ==========================================
+# BACK ON UBUNTU HOST:
+# ==========================================
+
+mkdir -p ~/Downloads
+multipass transfer newk3sServer:rk3s.tar.gz ~/Downloads/rk3s.tar.gz
+ls -lh ~/Downloads/rk3s.tar.gz
+
+# Load the tarball into your Host's Docker
+sudo docker load -i ~/Downloads/rk3s.tar.gz
+sudo docker images | grep rancher
+
+# Create the cluster using k3d on the Host
+sudo k3d cluster create --image rancher/k3s:v1.33.0-k3s-63ab8e53-amd64 # use actual image name from docker ps output
+sudo k3d cluster list
+
+# Create the hidden .kube directory for your user
+mkdir -p ~/.kube
+
+# Extract the cluster config and save it to your user's folder
+sudo k3d kubeconfig get k3s-default | sudo tee ~/.kube/config > /dev/null
+
+# Change ownership of the file to the 'ubuntu' user
+sudo chown $(id -u):$(id -g) ~/.kube/config
+chmod 600 ~/.kube/config
+
+kubectl get pods -A
+
+# to tear down multipass
+multipass stop newk3sServer
+multipass delete newk3sServer
+multipass purge
